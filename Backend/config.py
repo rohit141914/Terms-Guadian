@@ -16,7 +16,17 @@ class Settings(BaseSettings):
     # Ollama settings
     ollama_base_url: str = "http://localhost:11434"
 
+    # Max tokens for LLM response
+    llm_max_tokens: int = 4096
+
     # Cache TTL in seconds (0 = disabled)
     cache_ttl: int = 3600
+
+    # How often (in seconds) to sweep and delete expired cache entries
+    cache_clean_interval: int = 3600  # default: 1 hour
+
+    # MongoDB (must be set in .env)
+    mongo_uri: str
+    mongo_db_name: str
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}

@@ -11,17 +11,19 @@ from schemas import SummarizeRequest, SummarizeResponse
 from prompt import SYSTEM_PROMPT
 from providers import get_provider
 from cache import TTLCache
+from database import init_db, db_get, db_set
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("terms-guardian")
 
 settings = Settings()
 provider = get_provider(settings)
-cache = TTLCache(ttl=settings.cache_ttl)
+cache = TTLCache(ttl=settings.cache_ttl, clean_interval=settings.cache_clean_interval)
+init_db(settings.mongo_uri, settings.mongo_db_name)
 
 logger.info("=== Terms Guardian API ===")
 logger.info("Provider: %s | Model: %s", settings.llm_provider, settings.llm_model)
-logger.info("Cache TTL: %ds", settings.cache_ttl)
+logger.info("Cache TTL: %ds | MongoDB: %s/%s", settings.cache_ttl, settings.mongo_uri, settings.mongo_db_name)
 
 app = FastAPI(title="Terms Guardian API", version="1.0.0")
 
@@ -37,15 +39,24 @@ app.add_middleware(
 async def summarize(req: SummarizeRequest):
     content_len = len(req.content)
     content_preview = req.content[:100].replace("\n", " ")
-    logger.info(">>> Request received | %d chars | '%s...'", content_len, content_preview)
+    logger.info(">>> Request received | domain=%s | %d chars | '%s...'", req.domain, content_len, content_preview)
 
-    # Check cache first
     cache_key = hashlib.sha256(req.content.encode()).hexdigest()
+
+    # 1. Check in-memory cache
     cached = cache.get(cache_key)
     if cached:
-        logger.info("<<< Cache hit for %s | returning cached result", cache_key[:12])
+        logger.info("<<< Cache hit (memory) for %s", cache_key[:12])
         return cached
 
+    # 2. Check MongoDB
+    db_result = await db_get(cache_key)
+    if db_result:
+        logger.info("<<< Cache hit (database) for %s | populating memory cache", cache_key[:12])
+        cache.set(cache_key, db_result)
+        return db_result
+
+    # 3. Call LLM
     logger.info("--- Sending to %s (%s)...", settings.llm_provider, settings.llm_model)
     start = time.time()
 
@@ -70,18 +81,27 @@ async def summarize(req: SummarizeRequest):
     logger.info("--- LLM responded in %.1fs", elapsed)
 
     # Normalize risk levels to ensure frontend compatibility
-    valid_risks = {"high", "medium", "low"}
+    _risk_order = {"high": 0, "medium": 1, "low": 2}
+    valid_risks = set(_risk_order.keys())
     if result.get("risk_level") not in valid_risks:
         result["risk_level"] = "medium"
     for clause in result.get("clauses", []):
         if clause.get("risk") not in valid_risks:
             clause["risk"] = "medium"
 
-    # Cache the result
+    # Sort clauses: high → medium → low
+    result["clauses"] = sorted(
+        result.get("clauses", []),
+        key=lambda c: _risk_order.get(c.get("risk"), 1),
+    )
+
+    # Store in MongoDB and memory cache
+    await db_set(cache_key, result, domain=req.domain)
     cache.set(cache_key, result)
+
     clause_count = len(result.get("clauses", []))
     logger.info(
-        "<<< Done | risk=%s | %d clauses | cached as %s",
+        "<<< Done | risk=%s | %d clauses | saved to DB + memory cache as %s",
         result["risk_level"],
         clause_count,
         cache_key[:12],

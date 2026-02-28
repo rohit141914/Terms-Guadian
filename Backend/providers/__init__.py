@@ -12,7 +12,7 @@ def get_provider(settings: Settings) -> LLMProvider:
 
     elif name == "anthropic":
         from .anthropic_provider import AnthropicProvider
-        return AnthropicProvider(api_key=settings.anthropic_api_key, model=settings.llm_model)
+        return AnthropicProvider(api_key=settings.anthropic_api_key, model=settings.llm_model, max_tokens=settings.llm_max_tokens)
 
     elif name == "gemini":
         from .gemini_provider import GeminiProvider

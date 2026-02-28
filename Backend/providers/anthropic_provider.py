@@ -11,7 +11,7 @@ class AnthropicProvider(LLMProvider):
         client = anthropic.AsyncAnthropic(api_key=self.api_key)
         response = await client.messages.create(
             model=self.model,
-            max_tokens=4096,
+            max_tokens=self.max_tokens,
             system=system_prompt,
             messages=[
                 {"role": "user", "content": content},
