@@ -16,6 +16,12 @@ from database import init_db, db_get, db_set
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("read-rules")
 
+class _NoHealthCheck(logging.Filter):
+    def filter(self, record):
+        return "GET /health" not in record.getMessage()
+
+logging.getLogger("uvicorn.access").addFilter(_NoHealthCheck())
+
 settings = Settings()
 provider = get_provider(settings)
 cache = TTLCache(ttl=settings.cache_ttl, clean_interval=settings.cache_clean_interval)
