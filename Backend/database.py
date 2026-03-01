@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from motor.motor_asyncio import AsyncIOMotorCollection
 
 _collection: AsyncIOMotorCollection | None = None
@@ -15,10 +17,15 @@ async def db_get(cache_key: str) -> dict | None:
     return doc["result"] if doc else None
 
 
-async def db_set(cache_key: str, result: dict, domain: str | None = None) -> None:
-    doc = {"result": result}
+async def db_set(cache_key: str, result: dict, domain: str | None = None, links: list | None = None) -> None:
+    doc = {
+        "result": result,
+        "saved_at": datetime.now(timezone.utc),
+    }
     if domain:
         doc["domain"] = domain
+    if links:
+        doc["links"] = links
     await _collection.update_one(
         {"_id": cache_key},
         {"$set": doc},

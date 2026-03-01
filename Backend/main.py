@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import Settings
-from schemas import SummarizeRequest, SummarizeResponse
+from schemas import SummarizeRequest, SummarizeResponse, IdentifyLinksRequest, IdentifyLinksResponse, PolicyLink
 from prompt import SYSTEM_PROMPT
 from providers import get_provider
 from cache import TTLCache
@@ -33,6 +33,31 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+IDENTIFY_PROMPT = (
+    "You are given a list of links from a webpage in the format 'Label | URL'.\n"
+    "Return ONLY the links that are privacy policies, terms of service, cookie policies, "
+    "legal notices, user agreements, or similar legal/consent documents.\n"
+    "Respond with a JSON object: {\"links\": [{\"label\": \"...\", \"url\": \"...\"}]}\n"
+    "If none are relevant, return {\"links\": []}."
+)
+
+
+@app.post("/identify-links", response_model=IdentifyLinksResponse)
+async def identify_links(req: IdentifyLinksRequest):
+    logger.info(">>> Identify links | domain=%s | %d links", req.domain, len(req.links))
+    links_text = "\n".join(f"{l.label} | {l.url}" for l in req.links[:200])
+    try:
+        result = await provider.analyze(links_text, IDENTIFY_PROMPT)
+    except Exception as e:
+        logger.error("!!! identify-links error: %s", e)
+        raise HTTPException(status_code=502, detail=f"LLM provider error: {str(e)}")
+
+    raw_links = result.get("links", [])
+    policy_links = [PolicyLink(label=l.get("label", ""), url=l.get("url", "")) for l in raw_links if l.get("url")]
+    logger.info("<<< Identified %d policy links", len(policy_links))
+    return IdentifyLinksResponse(links=policy_links)
 
 
 @app.post("/summarize", response_model=SummarizeResponse)
@@ -96,7 +121,7 @@ async def summarize(req: SummarizeRequest):
     )
 
     # Store in MongoDB and memory cache
-    await db_set(cache_key, result, domain=req.domain)
+    await db_set(cache_key, result, domain=req.domain, links=[l.model_dump() for l in req.links])
     cache.set(cache_key, result)
 
     clause_count = len(result.get("clauses", []))
