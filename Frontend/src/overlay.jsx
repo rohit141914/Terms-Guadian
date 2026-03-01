@@ -173,7 +173,7 @@ function showResult(shadow, data) {
             const cr = RISK_COLORS[c.risk] || RISK_COLORS.unknown;
             return `
             <div class="tg-clause" style="border-left:3px solid ${cr.border}; background:${cr.bg};">
-              <span class="tg-clause-badge" style="color:${cr.text};">${(c.risk || "info").toUpperCase()}</span>
+              <span class="tg-clause-badge" style="color:${cr.text};">${escapeHTML((c.risk || "info").toUpperCase())}</span>
               <p class="tg-clause-label">What the policy says</p>
               <p class="tg-clause-text">${escapeHTML(c.text)}</p>
               ${c.reason ? `<p class="tg-clause-label">Why this matters</p><p class="tg-clause-reason">${escapeHTML(c.reason)}</p>` : ""}
