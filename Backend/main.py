@@ -14,18 +14,18 @@ from cache import TTLCache
 from database import init_db, db_get, db_set
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("terms-guardian")
+logger = logging.getLogger("read-rules")
 
 settings = Settings()
 provider = get_provider(settings)
 cache = TTLCache(ttl=settings.cache_ttl, clean_interval=settings.cache_clean_interval)
 init_db(settings.mongo_uri, settings.mongo_db_name)
 
-logger.info("=== Terms Guardian API ===")
+logger.info("=== Read Rules API ===")
 logger.info("Provider: %s | Model: %s", settings.llm_provider, settings.llm_model)
 logger.info("Cache TTL: %ds | MongoDB: %s/%s", settings.cache_ttl, settings.mongo_uri, settings.mongo_db_name)
 
-app = FastAPI(title="Terms Guardian API", version="1.0.0")
+app = FastAPI(title="Read Rules API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,

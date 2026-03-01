@@ -1,16 +1,16 @@
 export function createCard() {
   const card = document.createElement("div");
-  card.className = "tg-card";
+  card.className = "rr-card";
   return card;
 }
 
 export function clearContent(shadow) {
-  const existing = shadow.querySelector(".tg-card");
+  const existing = shadow.querySelector(".rr-card");
   if (existing) existing.remove();
 }
 
 export function dismiss() {
-  const host = document.getElementById("terms-guardian-host");
+  const host = document.getElementById("read-rules-host");
   if (host) host.remove();
 }
 

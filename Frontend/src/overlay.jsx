@@ -60,7 +60,7 @@ async function identifyAndAnalyze(allLinks) {
     showLoading(host);
     await analyzePolicies(policyLinks, host);
   } catch (err) {
-    console.error("Terms Guardian: Error identifying policy links:", err);
+    console.error("Read Rules: Error identifying policy links:", err);
     if (host) showError(host);
   }
 }
@@ -110,7 +110,7 @@ async function analyzePolicies(policyLinks, existingHost = null) {
 
     showResult(host, response);
   } catch (err) {
-    console.error("Terms Guardian: Error analyzing policies:", err);
+    console.error("Read Rules: Error analyzing policies:", err);
     showError(host);
   }
 }
@@ -118,7 +118,7 @@ async function analyzePolicies(policyLinks, existingHost = null) {
 // --- Shadow DOM host ---
 function createOverlayHost() {
   const host = document.createElement("div");
-  host.id = "terms-guardian-host";
+  host.id = "read-rules-host";
   host.style.cssText =
     "all:initial; position:fixed; z-index:2147483647; bottom:20px; right:20px;";
   document.body.appendChild(host);
@@ -137,18 +137,18 @@ function showLoading(shadow) {
   clearContent(shadow);
   const card = createCard();
   card.innerHTML = `
-    <div class="tg-header">
-      <span class="tg-logo">&#x1f6e1;</span>
-      <span class="tg-title">Terms Guardian</span>
-      <button class="tg-close" aria-label="Close">&times;</button>
+    <div class="rr-header">
+      <span class="rr-logo">&#x1f6e1;</span>
+      <span class="rr-title">Read Rules</span>
+      <button class="rr-close" aria-label="Close">&times;</button>
     </div>
-    <div class="tg-body tg-loading">
-      <div class="tg-spinner"></div>
+    <div class="rr-body rr-loading">
+      <div class="rr-spinner"></div>
       <p>Scanning terms &amp; privacy policies...</p>
     </div>
   `;
   shadow.appendChild(card);
-  card.querySelector(".tg-close").onclick = () => dismiss();
+  card.querySelector(".rr-close").onclick = () => dismiss();
 }
 
 // --- Result State ---
@@ -166,17 +166,17 @@ function showResult(shadow, data) {
   let clausesHTML = "";
   if (clauses.length > 0) {
     clausesHTML = `
-      <div class="tg-clauses">
+      <div class="rr-clauses">
         <h4>Flagged Clauses</h4>
         ${clauses
           .map((c) => {
             const cr = RISK_COLORS[c.risk] || RISK_COLORS.unknown;
             return `
-            <div class="tg-clause" style="border-left:3px solid ${cr.border}; background:${cr.bg};">
-              <span class="tg-clause-badge" style="color:${cr.text};">${escapeHTML((c.risk || "info").toUpperCase())}</span>
-              <p class="tg-clause-label">What the policy says</p>
-              <p class="tg-clause-text">${escapeHTML(c.text)}</p>
-              ${c.reason ? `<p class="tg-clause-label">Why this matters</p><p class="tg-clause-reason">${escapeHTML(c.reason)}</p>` : ""}
+            <div class="rr-clause" style="border-left:3px solid ${cr.border}; background:${cr.bg};">
+              <span class="rr-clause-badge" style="color:${cr.text};">${escapeHTML((c.risk || "info").toUpperCase())}</span>
+              <p class="rr-clause-label">What the policy says</p>
+              <p class="rr-clause-text">${escapeHTML(c.text)}</p>
+              ${c.reason ? `<p class="rr-clause-label">Why this matters</p><p class="rr-clause-reason">${escapeHTML(c.reason)}</p>` : ""}
             </div>`;
           })
           .join("")}
@@ -185,24 +185,24 @@ function showResult(shadow, data) {
   }
 
   card.innerHTML = `
-    <div class="tg-header">
-      <span class="tg-logo">&#x1f6e1;</span>
-      <span class="tg-title">Terms Guardian</span>
-      <button class="tg-minimize" aria-label="Minimize">&#x2015;</button>
-      <button class="tg-close" aria-label="Close">&times;</button>
+    <div class="rr-header">
+      <span class="rr-logo">&#x1f6e1;</span>
+      <span class="rr-title">Read Rules</span>
+      <button class="rr-minimize" aria-label="Minimize">&#x2015;</button>
+      <button class="rr-close" aria-label="Close">&times;</button>
     </div>
-    <div class="tg-body">
-      <div class="tg-risk-badge" style="background:${risk.bg}; border:1px solid ${risk.border}; color:${risk.text};">
+    <div class="rr-body">
+      <div class="rr-risk-badge" style="background:${risk.bg}; border:1px solid ${risk.border}; color:${risk.text};">
         ${risk.label}
       </div>
-      <div class="tg-summary">
+      <div class="rr-summary">
         <h4>Summary</h4>
         <p>${escapeHTML(summary)}</p>
       </div>
       ${clausesHTML}
-      <div class="tg-actions">
-        <button class="tg-btn tg-btn-primary" id="tg-accept">I've read this &ndash; Don't show again</button>
-        <button class="tg-btn tg-btn-ghost" id="tg-dismiss">Dismiss</button>
+      <div class="rr-actions">
+        <button class="rr-btn rr-btn-primary" id="rr-accept">I've read this &ndash; Don't show again</button>
+        <button class="rr-btn rr-btn-ghost" id="rr-dismiss">Dismiss</button>
       </div>
     </div>
   `;
@@ -210,18 +210,18 @@ function showResult(shadow, data) {
   shadow.appendChild(card);
 
   let minimized = false;
-  const body = card.querySelector(".tg-body");
-  card.querySelector(".tg-minimize").onclick = () => {
+  const body = card.querySelector(".rr-body");
+  card.querySelector(".rr-minimize").onclick = () => {
     minimized = !minimized;
     body.style.display = minimized ? "none" : "block";
-    card.querySelector(".tg-minimize").innerHTML = minimized
+    card.querySelector(".rr-minimize").innerHTML = minimized
       ? "&#x2750;"
       : "&#x2015;";
   };
 
-  card.querySelector(".tg-close").onclick = () => dismiss();
-  card.querySelector("#tg-dismiss").onclick = () => dismiss();
-  card.querySelector("#tg-accept").onclick = () => {
+  card.querySelector(".rr-close").onclick = () => dismiss();
+  card.querySelector("#rr-dismiss").onclick = () => dismiss();
+  card.querySelector("#rr-accept").onclick = () => {
     chrome.storage.local.set({ [domain]: true });
     dismiss();
   };
@@ -232,20 +232,20 @@ function showError(shadow) {
   clearContent(shadow);
   const card = createCard();
   card.innerHTML = `
-    <div class="tg-header">
-      <span class="tg-logo">&#x1f6e1;</span>
-      <span class="tg-title">Terms Guardian</span>
-      <button class="tg-close" aria-label="Close">&times;</button>
+    <div class="rr-header">
+      <span class="rr-logo">&#x1f6e1;</span>
+      <span class="rr-title">Read Rules</span>
+      <button class="rr-close" aria-label="Close">&times;</button>
     </div>
-    <div class="tg-body tg-error">
+    <div class="rr-body rr-error">
       <p><strong>Could not analyze this page.</strong></p>
       <p>The backend service may be offline. Make sure it's running at <code>${import.meta.env.VITE_API_URL}</code>.</p>
-      <button class="tg-btn tg-btn-ghost" id="tg-retry">Retry</button>
+      <button class="rr-btn rr-btn-ghost" id="rr-retry">Retry</button>
     </div>
   `;
   shadow.appendChild(card);
-  card.querySelector(".tg-close").onclick = () => dismiss();
-  card.querySelector("#tg-retry").onclick = () => {
+  card.querySelector(".rr-close").onclick = () => dismiss();
+  card.querySelector("#rr-retry").onclick = () => {
     dismiss();
     scanForPolicies();
   };

@@ -4,7 +4,7 @@
   box-sizing: border-box;
 }
 
-.tg-card {
+.rr-card {
   width: 370px;
   max-height: 480px;
   background: #ffffff;
@@ -14,15 +14,15 @@
   font-size: 14px;
   color: #1e293b;
   overflow: hidden;
-  animation: tg-slide-in 0.3s ease-out;
+  animation: rr-slide-in 0.3s ease-out;
 }
 
-@keyframes tg-slide-in {
+@keyframes rr-slide-in {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.tg-header {
+.rr-header {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -31,16 +31,16 @@
   color: #f8fafc;
 }
 
-.tg-logo { font-size: 18px; }
+.rr-logo { font-size: 18px; }
 
-.tg-title {
+.rr-title {
   font-weight: 600;
   font-size: 15px;
   flex: 1;
 }
 
-.tg-close,
-.tg-minimize {
+.rr-close,
+.rr-minimize {
   background: none;
   border: none;
   color: #94a3b8;
@@ -51,19 +51,19 @@
   line-height: 1;
 }
 
-.tg-close:hover,
-.tg-minimize:hover {
+.rr-close:hover,
+.rr-minimize:hover {
   color: #f8fafc;
   background: rgba(255, 255, 255, 0.1);
 }
 
-.tg-body {
+.rr-body {
   padding: 16px;
   overflow-y: auto;
   max-height: 420px;
 }
 
-.tg-risk-badge {
+.rr-risk-badge {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 20px;
@@ -74,8 +74,8 @@
   letter-spacing: 0.5px;
 }
 
-.tg-summary h4,
-.tg-clauses h4 {
+.rr-summary h4,
+.rr-clauses h4 {
   margin: 0 0 6px;
   font-size: 13px;
   text-transform: uppercase;
@@ -83,27 +83,27 @@
   color: #64748b;
 }
 
-.tg-summary p {
+.rr-summary p {
   margin: 0 0 16px;
   line-height: 1.6;
   color: #334155;
 }
 
-.tg-clauses h4 { margin-bottom: 8px; }
+.rr-clauses h4 { margin-bottom: 8px; }
 
-.tg-clause {
+.rr-clause {
   padding: 10px 12px;
   margin-bottom: 8px;
   border-radius: 8px;
 }
 
-.tg-clause-badge {
+.rr-clause-badge {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.5px;
 }
 
-.tg-clause-label {
+.rr-clause-label {
   margin: 8px 0 2px;
   font-size: 10px;
   font-weight: 700;
@@ -112,26 +112,26 @@
   color: #94a3b8;
 }
 
-.tg-clause-text {
+.rr-clause-text {
   margin: 2px 0 2px;
   line-height: 1.5;
   color: #1e293b;
 }
 
-.tg-clause-reason {
+.rr-clause-reason {
   margin: 2px 0 0;
   font-size: 12px;
   color: #64748b;
   font-style: italic;
 }
 
-.tg-actions {
+.rr-actions {
   display: flex;
   gap: 8px;
   margin-top: 16px;
 }
 
-.tg-btn {
+.rr-btn {
   padding: 8px 14px;
   border-radius: 8px;
   font-size: 13px;
@@ -141,26 +141,26 @@
   transition: all 0.15s ease;
 }
 
-.tg-btn-primary {
+.rr-btn-primary {
   background: #0f172a;
   color: #f8fafc;
   flex: 1;
 }
 
-.tg-btn-primary:hover { background: #1e293b; }
+.rr-btn-primary:hover { background: #1e293b; }
 
-.tg-btn-ghost {
+.rr-btn-ghost {
   background: transparent;
   color: #64748b;
   border: 1px solid #e2e8f0;
 }
 
-.tg-btn-ghost:hover {
+.rr-btn-ghost:hover {
   background: #f8fafc;
   color: #334155;
 }
 
-.tg-loading {
+.rr-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -168,40 +168,40 @@
   padding: 32px 16px;
 }
 
-.tg-spinner {
+.rr-spinner {
   width: 32px;
   height: 32px;
   border: 3px solid #e2e8f0;
   border-top-color: #0f172a;
   border-radius: 50%;
-  animation: tg-spin 0.8s linear infinite;
+  animation: rr-spin 0.8s linear infinite;
 }
 
-@keyframes tg-spin {
+@keyframes rr-spin {
   to { transform: rotate(360deg); }
 }
 
-.tg-loading p {
+.rr-loading p {
   color: #64748b;
   font-size: 13px;
 }
 
-.tg-error {
+.rr-error {
   text-align: center;
   padding: 24px 16px;
 }
 
-.tg-error p {
+.rr-error p {
   margin: 0 0 8px;
   color: #64748b;
   line-height: 1.5;
 }
 
-.tg-error code {
+.rr-error code {
   background: #f1f5f9;
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 13px;
 }
 
-.tg-error .tg-btn { margin-top: 12px; }
+.rr-error .rr-btn { margin-top: 12px; }

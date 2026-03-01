@@ -1,7 +1,7 @@
 import { MSG } from "./constants";
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("Terms Guardian installed");
+  console.log("Read Rules installed");
 });
 
 // Listen for messages from popup or content scripts
